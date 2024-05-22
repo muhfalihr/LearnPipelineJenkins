@@ -1,0 +1,75 @@
+// https://www.jenkins.io/doc/pipeline/steps/pipeline-utility-steps/#pipeline-utility-steps
+
+// findFiles => Mencari files
+pipeline {
+    agent any
+    stages {
+        stage('writeFilesTest') {
+            steps {
+                script {
+                    for (int i = 1; i < 11; i++) {
+                        writeFile(file: "file-${i}.txt", text: "Ini adalah file ${i}")
+                    }
+                }
+            }
+        }
+        stage('findFilesTest') {
+            steps {
+                script {
+                    def files = findFiles(glob: '**/*.txt')
+
+                    for (int i = 0; i < files.size(); i++) {
+                        echo """
+    File name : ${files[i].name}
+    Path : ${files[i].path}
+    Directory : ${files[i].directory}
+    Length : ${files[i].length}
+    lastModified : ${files[i].lastModified}
+    """
+                    }
+                }
+            }
+        }
+    }
+}
+
+// prependToFile => membuat files jika not already exist
+pipeline {
+    agent any
+    stages {
+        stage('prependToFileTest') {
+            steps {
+                script {
+                    prependToFile(file: 'contoh.txt', content: 'contoh 1')
+                }
+            }
+        }
+    }
+}
+
+// writeJSON dan readJSON
+pipeline {
+    agent any
+    stages {
+        stage('writeJSON') {
+            steps {
+                script {
+                    def data = [
+                        "firstName": "Muhammad",
+                        "middleName": "Falih",
+                        "lastName": "Romadhoni"
+                    ]
+                    writeJSON(file: "data.json", json: data)
+                }
+            }
+        }
+        stage('readJSON') {
+            steps {
+                script {
+                    def props = readJSON file: 'data.json'
+                    echo "${props}"
+                }
+            }
+        }
+    }
+}

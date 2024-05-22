@@ -1,0 +1,28 @@
+// agent none
+
+pipeline {
+    agent none
+}
+
+// agent any
+pipeline {
+    agent any
+}
+
+// agent label
+pipeline {
+    agent {
+        label 'my-label'
+    }
+}
+
+// agent node
+pipeline {
+    agent {
+        node {
+            label 'my-label'
+        }
+    }
+}
+
+// https://www.jenkins.io/doc/book/pipeline/syntax/#agent

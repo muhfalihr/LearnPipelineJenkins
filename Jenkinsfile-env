@@ -1,0 +1,47 @@
+// Environment
+pipeline {
+    agent none
+    environment {
+        AUTHOR = "Muhammad Falih Romadhoni"
+    }
+    stages {
+        stage('Build') {
+            agent {
+                node {
+                    label 'node1'
+                }
+            }
+            steps {
+                script {
+                    echo "Author Name : ${env.AUTHOR}"
+                    echo "Start Job : ${env.JOB_NAME}"
+                    echo "Start Build : ${env.BUILD_NUMBER}"
+                    echo "Branch Name : ${env.BRANCH_NAME}"
+                }
+            }
+        }
+    }
+}
+
+// Environment Credentials
+pipeline {
+    agent none
+    stages {
+        stage('Build') {
+            agent {
+                node {
+                    label 'node1'
+                }
+            }
+            environment {
+                APP = credentials("node1")
+            }
+            steps {
+                script {
+                    echo "Node User : ${env.APP_USR}"
+                    sh 'echo "Node Password : $APP_PSW" > "pw-node1.txt"'
+                }
+            }
+        }
+    }
+}

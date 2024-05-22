@@ -1,0 +1,132 @@
+// https://www.jenkins.io/doc/pipeline/steps/workflow-basic-steps/#pipeline-basic-steps
+
+pipeline {
+    agent none
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Start Build'
+                sleep(10)
+                echo 'Finish Build'
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Test'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploy'
+            }
+        }
+    }
+}
+
+// Catch error
+pipeline {
+    agent none
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Start Build'
+                sleep(10)
+                echo 'Finish Build'
+            }
+        }
+        stage('Test') {
+            steps {
+                script {
+                    echo 'Test1' 
+                    try {
+                        sh 'might fail'
+                        echo 'Succeeded!'
+                    } catch (err) {
+                        echo "Failed: ${err}"
+                    } finally {
+                        echo 'Test2'
+                    }
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploy'
+            }
+        }
+    }
+}
+
+// fileExists
+pipeline {
+    agent {
+        node {
+            label 'node1'
+        }
+    }
+    stages {
+        stage('FileExistsTest') {
+            steps {
+                script {
+                    if (fileExists('/home/belajar-kubernetes/nginx-harbor/WebTemplate/Jenkinsfile')) {
+                        echo "File /home/belajar-kubernetes/nginx-harbor/WebTemplate/Jenkinsfile found!"
+                        sh "cat /home/belajar-kubernetes/nginx-harbor/WebTemplate/Jenkinsfile"
+                    }
+                }
+            }
+        }
+    }
+}
+
+// readFile
+pipeline {
+    agent {
+        node {
+            label 'node1'
+        }
+    }
+    stages {
+        stage('readFileTest') {
+            steps {
+                script {
+                    def value = readFile(file: '/home/belajar-kubernetes/nginx-harbor/WebTemplate/Dockerfile')
+                    echo "Value file from /home/belajar-kubernetes/nginx-harbor/WebTemplate/Dockerfile:\n${value}"
+                }
+            }
+        }
+    }
+}
+
+// writeFile
+pipeline {
+    environment {
+        PATH = '/home/datadiiri.txt'
+    }
+    agent {
+        node {
+            label 'node1'
+        }
+    }
+    stages {
+        stage('writeFileTest') {
+            steps {
+                script {
+                    def value = """
+Nama : Muhammad Falih Romadhoni
+Umur : 18 Tahun
+Domisili : Parigi Baru, Pondok Aren, Tangerang Selatan
+"""
+                    writeFile(file: "${env.PATH}", text: value )
+                }
+            }
+        }
+        stage('readFileTest') {
+            steps {
+                script {
+                    def value = readFile(file: "${env.PATH}")
+                    echo "Value file from ${env.PATH}:\n${value}"
+                }
+            }
+        }
+    }
+}

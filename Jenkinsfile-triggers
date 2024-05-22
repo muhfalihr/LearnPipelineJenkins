@@ -1,0 +1,23 @@
+// https://www.jenkins.io/doc/book/pipeline/syntax/#triggers
+
+pipeline {
+    agent any
+    environment {
+        AUTHOR = 'Muhammad Falih Romadhoni'
+    }
+    triggers {
+        cron('* * * * *')
+        // pollSCM('* * * * *')
+        // upstream(upstreamProjects: 'job1,job2', threshold: hudson.model.Result.SUCCESS)
+    }
+    stages {
+        stage('Example') {
+            options {
+                timestamps()
+            }
+            steps {
+                echo 'Hello World'
+            }
+        }
+    }
+}

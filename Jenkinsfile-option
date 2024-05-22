@@ -1,0 +1,25 @@
+// https://www.jenkins.io/doc/book/pipeline/syntax/#options
+
+pipeline {
+    agent any
+    options {
+        timeout(time: 3600, unit: 'SECONDS')
+        timeout(time: 60, unit: 'MINUTES')
+        timeout(time: 1, unit: 'HOURS')
+    }
+    stages {
+        stage('Belajar-Option') {
+            options {
+                timestamps()
+                retry(3)
+            }
+            steps {
+                echo 'Hello World!'
+                script {
+                    sh 'might fail'
+                    echo 'Succeeded!'
+                }
+            }
+        }
+    }
+}

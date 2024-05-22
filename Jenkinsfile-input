@@ -1,0 +1,70 @@
+// https://www.jenkins.io/doc/book/pipeline/syntax/#input
+
+// string
+pipeline {
+    agent any
+    environment {
+        AUTHOR = 'Muhammad Falih Romadhoni'
+    }
+    stages {
+        stage('Deploy') {
+            input {
+                message "What is your name?"
+                ok "Yes, it's"
+                submitter "muhfalihr,muhfadhilsan"
+                parameters {
+                    string(name: 'NAME', defaultValue: 'Guest', description: 'What is your name')
+                }
+            }
+            steps {
+                echo "Hello, ${env.NAME}, nice to meet you."
+            }
+        }
+    }
+}
+
+// choice
+pipeline {
+    agent any
+    environment {
+        AUTHOR = 'Muhammad Falih Romadhoni'
+    }
+    stages {
+        stage('Deploy') {
+            input {
+                message "Can we deploy?"
+                ok "Yes, of course"
+                submitter "muhfalihr,muhfadhilsan"
+                parameters {
+                    choice(name: 'TARGET_ENV', choices: ['DEV', 'QA', 'PROD'], description: 'We will deploy to?')
+                }
+            }
+            steps {
+                echo "Deploy to ${env.TARGET_ENV}"
+            }
+        }
+    }
+}
+
+// with env
+pipeline {
+    agent any
+
+    stages {
+        stage('Name') {
+            steps {
+                script {
+                    env.NAME = input message: "What is your name?", ok: "yes, it's", submitter: "muhfalihr,muhfadhilsan",
+                    parameters: [
+                        string(name: 'NAME', defaultValue: 'Guest', description: 'What is your name')
+                    ]
+                }
+            }
+        }
+        stage('Hello') {
+            steps {
+                echo "Hello, ${env.NAME}, nice to meet you."
+            }
+        }
+    }
+}
