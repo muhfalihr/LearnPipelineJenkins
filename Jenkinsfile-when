@@ -1,9 +1,291 @@
+// https://www.jenkins.io/doc/book/pipeline/syntax/#when
+
+// branch
 pipeline {
     agent any
     stages {
         stage('test') {
+            when {
+                branch 'master'
+            }
             steps {
                 echo "Branch Name : ${env.BRANCH_NAME}"
+            }
+        }
+    }
+}
+
+// branch pattern
+pipeline {
+    agent any
+    stages {
+        stage('test') {
+            when {
+                branch pattern: 'release-\\d+', comparator: 'REGEXP'
+            }
+            steps {
+                echo "Branch Name : ${env.BRANCH_NAME}"
+            }
+        }
+    }
+}
+
+// buildingTag
+pipeline {
+    agent any
+    environment {
+        REPO_URL = 'https://github.com/muhfalihr/LearnPipelineJenkins.git'
+        TAG_NAME = "${env.GIT_TAG_NAME}"
+    }
+    stages {
+        stage('tag check') {
+            when { buildingTag() }
+            steps {
+                echo "Building for tag : ${env.TAG_NAME}"
+            }
+        }
+    }
+}
+
+// environment
+pipeline {
+    agent any
+    stages {
+        stage('input') {
+            steps {
+                script {
+                    env.DEPLOY_TO = input message: 'Deploy to ?', ok: 'Yes', submitter: 'muhfalihr',
+                    parameters: [
+                        choice(name: 'DEPLOY_TO', choices: ['production', 'qa', 'development'], description: 'We will deploy to?')
+                    ]
+                }
+            }
+        }
+        stage('whenTest1') {
+            when {
+                environment name: 'DEPLOY_TO', value: 'production'
+            }
+            steps {
+                echo "Deploy to ${env.DEPLOY_TO}"
+            }
+        }
+        stage('whenTest2') {
+            when {
+                environment name: 'DEPLOY_TO', value: 'development'
+            }
+            steps {
+                echo "Deploy to ${env.DEPLOY_TO}"
+            }
+        }
+    }
+}
+
+// equals
+pipeline {
+    agent any
+    stages {
+        stage('expected-77') {
+            when {
+                equals expected: 77, actual: currentBuild.number
+            }
+            steps {
+                echo "Build ke ${currentBuild.number}"
+            }
+        }
+        stage('expected-78') {
+            when {
+                equals expected: 78, actual: currentBuild.number
+            }
+            steps {
+                echo "Build ke ${currentBuild.number}"
+            }
+        }
+    }
+}
+
+// expression
+pipeline {
+    agent any
+    parameters {
+        booleanParam(name: 'DEBUG_BUILD', defaultValue: false, description: 'Activate debug build ?')
+    }
+    stages {
+        stage('expressionTest') {
+            when {
+                expression {
+                    return params.DEBUG_BUILD
+                }
+            }
+            steps {
+                echo 'Hello World'
+            }
+        }
+    }
+}
+
+// not
+pipeline {
+    agent any
+    stages {
+        stage('input') {
+            steps {
+                script {
+                    env.DEPLOY_TO = input message: 'Deploy to ?', ok: 'Yes', submitter: 'muhfalihr',
+                    parameters: [
+                        choice(name: 'DEPLOY_TO', choices: ['production', 'qa', 'development'], description: 'We will deploy to?')
+                    ]
+                }
+            }
+        }
+        stage('whenTest1') {
+            when {
+                environment name: 'DEPLOY_TO', value: 'production'
+            }
+            steps {
+                echo "Deploy to ${env.DEPLOY_TO}"
+            }
+        }
+        stage('whenTest2') {
+            when {
+                not { environment name: 'DEPLOY_TO', value: 'production' }
+            }
+            steps {
+                echo "Deploy to ${env.DEPLOY_TO}"
+            }
+        }
+    }
+}
+
+// allOf
+pipeline {
+    agent any
+    stages {
+        stage('input') {
+            steps {
+                script {
+                    env.DEPLOY_TO = input message: 'Deploy to ?', ok: 'Yes', submitter: 'muhfalihr',
+                    parameters: [
+                        choice(name: 'DEPLOY_TO', choices: ['production', 'qa', 'development'], description: 'We will deploy to?')
+                    ]
+                }
+            }
+        }
+        stage('whenTest1') {
+            when {
+                allOf { branch null; environment name: 'DEPLOY_TO', value: 'production' }
+            }
+            steps {
+                echo "Deploy to ${env.DEPLOY_TO}"
+            }
+        }
+        stage('whenTest2') {
+            when {
+                not { environment name: 'DEPLOY_TO', value: 'production' }
+            }
+            steps {
+                echo "Deploy to ${env.DEPLOY_TO}"
+            }
+        }
+    }
+}
+
+// anyOf
+pipeline {
+    agent any
+    stages {
+        stage('input') {
+            steps {
+                script {
+                    env.DEPLOY_TO = input message: 'Deploy to ?', ok: 'Yes', submitter: 'muhfalihr',
+                    parameters: [
+                        choice(name: 'DEPLOY_TO', choices: ['production', 'qa', 'development'], description: 'We will deploy to?')
+                    ]
+                }
+            }
+        }
+        stage('whenTest1') {
+            when {
+                allOf { branch null; environment name: 'DEPLOY_TO', value: 'production' }
+            }
+            steps {
+                echo "Deploy to ${env.DEPLOY_TO}"
+            }
+        }
+        stage('whenTest2') {
+            when {
+                anyOf { environment name: 'DEPLOY_TO', value: 'development'; environment name: 'DEPLOY_TO', value: 'qa' }
+            }
+            steps {
+                echo "Deploy to ${env.DEPLOY_TO}"
+            }
+        }
+    }
+}
+
+// beforeAgent
+pipeline {
+    agent none
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            agent {
+                label "node1"
+            }
+            when {
+                beforeAgent true
+                branch null
+            }
+            steps {
+                echo 'Deploying'
+            }
+        }
+    }
+}
+
+// beforeInput
+pipeline {
+    agent none
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                beforeInput true
+                branch null
+            }
+            input {
+                message "Deploy to production?"
+                id "simple-input"
+            }
+            steps {
+                echo 'Deploying'
+            }
+        }
+    }
+}
+
+// triggeredBy
+pipeline {
+    agent none
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                triggeredBy "TimerTrigger"
+            }
+            steps {
+                echo 'Deploying'
             }
         }
     }
