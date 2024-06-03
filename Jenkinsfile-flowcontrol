@@ -1,0 +1,38 @@
+// https://www.jenkins.io/doc/book/pipeline/syntax/#flow-control
+
+// Conditional Statement if, Scripted Pipeline
+pipeline {
+    agent any
+    stages {
+        stage('Flow-Control') {
+            steps {
+                script {
+                    if (env.BRANCH_NAME == 'master') {
+                        echo 'I only execute on the master branch'
+                    } else {
+                        echo 'I execute elsewhere'
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Try-Catch Block, Scripted Pipeline
+pipeline {
+    agent any
+    stages {
+        stage('Flow-Control') {
+            steps {
+                script {
+                    try {
+                        sh 'exit 1'
+                    }
+                    catch (exec) {
+                        echo 'Something failed, I should sound the klaxons!'
+                    }
+                }
+            }
+        }
+    }
+}
